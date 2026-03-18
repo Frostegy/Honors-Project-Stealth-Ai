@@ -4,9 +4,7 @@ using UnityEngine;
 public enum NoiseType
 {
     Footstep,
-    RunStep,
-    Jump,
-    Impact
+    Running
 }
 
 public struct NoiseEvent
@@ -21,7 +19,7 @@ public struct NoiseEvent
 // other scripts call NoiseSystem.Instance.Emit() to make a sound
 public class NoiseSystem : MonoBehaviour
 {
-    public static NoiseSystem Instance { get; private set; }
+    public static NoiseSystem Instance;
 
     // hearing sensors subscribe to this event to know when a sound happens
     public static event Action<NoiseEvent> OnNoiseEmitted;

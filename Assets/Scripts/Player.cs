@@ -1,53 +1,64 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.Audio;
+﻿using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    private CharacterController controller;
-
-    [SerializeField] private float speed = 5f;
-
-    [Header("Camera")]
+    [Header("References")]
+    [Tooltip("The camera transform that follows the player.")]
     [SerializeField] private Transform cameraTransform;
-    private Vector3 camera = new Vector3(0f, 20f, 1f);
-
-    [SerializeField] private AudioSource source = null;
-
-    public bool isSprinting = false;
-    public bool isCrouching = false;
-    public float speedMultiplier = 1.5f;
-
-    [Header("Noise Radius")]
-    [SerializeField] private float walkRadius = 6f;
-    [SerializeField] private float runRadius = 10f;
-
-    [Header("Footstep Timing")]
-    [SerializeField] private float walkStepInterval = 0.4f;
-    [SerializeField] private float runStepInterval = 0.25f;
-
+    [Tooltip("Audio source used for footstep sounds.")]
+    [SerializeField] private AudioSource source;
+    [Tooltip("The footstep audio clip to play.")]
     [SerializeField] private AudioClip footstepClip;
 
+    [Header("Movement")]
+    [Tooltip("Base movement speed.")]
+    [SerializeField] private float speed = 5f;
+    [Tooltip("Speed multiplier applied when sprinting. Also used to slow down crouching.")]
+    public float speedMultiplier = 1.5f;
+
+    [Header("Noise")]
+    [Tooltip("Noise radius emitted while walking.")]
+    [SerializeField] private float walkRadius = 6f;
+    [Tooltip("Noise radius emitted while sprinting.")]
+    [SerializeField] private float runRadius = 10f;
+
+    [Header("Footsteps")]
+    [Tooltip("Time between footstep sounds while walking.")]
+    [SerializeField] private float walkStepInterval = 0.4f;
+    [Tooltip("Time between footstep sounds while sprinting.")]
+    [SerializeField] private float runStepInterval = 0.25f;
+
+    [Header("Gizmos")]
+    [Tooltip("Draw the noise radius in the editor.")]
+    [SerializeField] private bool drawNoiseRadius = true;
+    [Tooltip("If enabled, always shows both walk and run radii. If disabled, shows the current movement state radius only.")]
+    [SerializeField] private bool alwaysShowRadius = true;
+
+    [Header("Debug Info (Read Only)")]
+    [Tooltip("Whether the player is currently sprinting.")]
+    public bool isSprinting = false;
+    [Tooltip("Whether the player is currently crouching.")]
+    public bool isCrouching = false;
+
+    private CharacterController controller;
+    private Vector3 cameraOffset = new Vector3(0f, 20f, 1f);
     private float footstepTimer = 0f;
+
     private void Start()
     {
         controller = GetComponent<CharacterController>();
 
         if (cameraTransform != null)
         {
-            cameraTransform.position = transform.position + camera;
+            cameraTransform.position = transform.position + cameraOffset;
             cameraTransform.rotation = Quaternion.Euler(90f, 0f, 0f);
         }
     }
 
     private void LateUpdate()
     {
-        // move the camera with the player every frame
         if (cameraTransform != null)
-        {
-            cameraTransform.position = transform.position + camera;
-        }
+            cameraTransform.position = transform.position + cameraOffset;
     }
 
     private void Update()
@@ -60,39 +71,25 @@ public class Player : MonoBehaviour
 
         Vector3 move = new Vector3(moveX, 0f, moveZ);
 
-        // go faster when sprinting
         if (isSprinting)
-        {
             move = move * speedMultiplier;
-        }
 
-        // go slower when crouching
         if (isCrouching)
-        {
             move = move / speedMultiplier;
-        }
 
         controller.Move(move * speed * Time.deltaTime);
 
-        // -------- FOOTSTEP NOISE --------
         bool isMoving = move.magnitude > 0.1f;
 
         if (isCrouching)
         {
-            // crouching makes no noise so reset the timer
             footstepTimer = 0f;
         }
         else if (isMoving)
         {
-            // pick the right interval depending on if we are sprinting or not
-            float interval = walkStepInterval;
+            float interval = isSprinting ? runStepInterval : walkStepInterval;
 
-            if (isSprinting)
-            {
-                interval = runStepInterval;
-            }
-
-            footstepTimer = footstepTimer + Time.deltaTime;
+            footstepTimer += Time.deltaTime;
 
             if (footstepTimer >= interval)
             {
@@ -104,33 +101,54 @@ public class Player : MonoBehaviour
         {
             footstepTimer = 0f;
         }
-       
     }
 
     public void EmitFootstep(bool running)
     {
         if (NoiseSystem.Instance == null) return;
 
-        float r = walkRadius;
+        float r = running ? runRadius : walkRadius;
+        NoiseType type = running ? NoiseType.Running : NoiseType.Footstep;
 
-        if (running)
-        {
-            r = runRadius;
-        }
-
-        if (running)
-        {
-            NoiseSystem.Instance.Emit(transform.position, r, NoiseType.RunStep, transform);
-        }
-        else
-        {
-            NoiseSystem.Instance.Emit(transform.position, r, NoiseType.Footstep, transform);
-        }
+        NoiseSystem.Instance.Emit(transform.position, r, type, transform);
 
         if (footstepClip != null && source != null)
         {
             source.pitch = Random.Range(0.9f, 1.1f);
             source.PlayOneShot(footstepClip);
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!drawNoiseRadius) return;
+
+        Vector3 pos = transform.position;
+
+        if (alwaysShowRadius)
+        {
+            Gizmos.color = new Color(1f, 1f, 0f, 0.35f);
+            Gizmos.DrawWireSphere(pos, walkRadius);
+
+            Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
+            Gizmos.DrawWireSphere(pos, runRadius);
+            return;
+        }
+
+        if (isCrouching)
+        {
+            Gizmos.color = new Color(0f, 1f, 1f, 0.35f);
+            Gizmos.DrawWireSphere(pos, 0.5f);
+        }
+        else if (isSprinting)
+        {
+            Gizmos.color = new Color(1f, 0f, 0f, 0.35f);
+            Gizmos.DrawWireSphere(pos, runRadius);
+        }
+        else
+        {
+            Gizmos.color = new Color(1f, 1f, 0f, 0.35f);
+            Gizmos.DrawWireSphere(pos, walkRadius);
         }
     }
 }

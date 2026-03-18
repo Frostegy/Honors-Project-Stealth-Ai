@@ -27,17 +27,17 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 564369640542931403}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
-  m_LocalPosition: {x: 0, y: 0, z: -0.14}
+  m_LocalRotation: {x: 0, y: 0.7071068, z: 0.7071068, w: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0.07}
   m_LocalScale: {x: 0.0171275, y: 0.0171275, z: 0.0171275}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6571263351110023931}
   m_Father: {fileID: 4450491217937871214}
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: -90, y: 180, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.191, y: 1.85}
+  m_AnchoredPosition: {x: -0.19, y: 1.85}
   m_SizeDelta: {x: 1036, y: 583}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &3509009386407824254
@@ -352,7 +352,7 @@ MonoBehaviour:
   patrolPoints: []
   visionCones: []
   hearingSensor: {fileID: 0}
-  isStationary: 1
+  isStationary: 0
   lookAngle: 60
   lookSpeed: 1
   stopDistance: 0.6
@@ -487,7 +487,7 @@ RectTransform:
   m_GameObject: {fileID: 6538424564982050149}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.5834, y: 1.5834, z: 1.5834}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 7930542100784551442}

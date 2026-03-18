@@ -3,36 +3,35 @@
 public class HearingCircle : MonoBehaviour
 {
     [Header("Hearing")]
+    [Tooltip("How far the enemy can hear sounds.")]
     public float hearingRadius = 8f;
 
     [Header("Detection")]
-    // how fast the hearing meter fills up when a sound is heard
+    [Tooltip("How fast the hearing meter fills when a sound is heard.")]
     public float hearingFillSpeed = 0.8f;
-    // how long it takes for the hearing meter to drain back to 0
+    [Tooltip("How long it takes for the hearing meter to drain back to zero after a sound.")]
     public float hearingDrainTime = 4f;
 
-    [Header("Occlusion (Walls)")]
+    [Header("Occlusion")]
+    [Tooltip("If enabled, walls will reduce how clearly the enemy hears sounds.")]
     public bool blockedSound = true;
+    [Tooltip("Layers treated as walls for sound occlusion.")]
     public LayerMask obstacleMask;
-    // if there is a wall between the enemy and the sound, multiply the strength by this
-    [Range(0f, 1f)] public float blockedSoundfalloff = 0.35f;
+    [Tooltip("How much a wall reduces the sound strength. 0 = fully blocked, 1 = no reduction.")]
+    [Range(0f, 1f)] public float blockedSoundFalloff = 0.35f;
 
-    [Header("Debug")]
+    [Header("Gizmos")]
+    [Tooltip("Draw the hearing radius in the editor.")]
     public bool drawGizmos = true;
+    [Tooltip("Draw a line in the scene view showing whether the last sound was blocked by a wall.")]
+    public bool drawSoundRay = true;
 
-    // 0 = heard nothing, 1 = fully alerted by sound
-    // the ai controller reads this the same way it reads the vision cone detection
     public float HearingLevel { get; private set; }
-
-    // when true the hearing level wont go up or down
-    // same as the vision cone freezeDetection, set by the ai controller while chasing
     public bool stopDetecting = false;
-
-    // store the last sound position so the controller can use it for searching
     public Vector3 LastHeardPosition { get; private set; }
     public bool HasHeardSomething { get; set; }
+    public float LastHeardStrength { get; private set; }
 
-    // used internally to know how strong the latest sound was
     private float latestSoundStrength = 0f;
     private bool receivedSoundThisFrame = false;
 
@@ -59,19 +58,16 @@ public class HearingCircle : MonoBehaviour
 
         if (receivedSoundThisFrame)
         {
-            // fill the hearing meter based on how strong the sound was
             HearingLevel += latestSoundStrength * hearingFillSpeed * Time.deltaTime;
         }
         else
         {
-            // no sound this frame, drain it down
             if (hearingDrainTime > 0f)
                 HearingLevel -= (1f / hearingDrainTime) * Time.deltaTime;
         }
 
         HearingLevel = Mathf.Clamp01(HearingLevel);
 
-        // reset for next frame
         receivedSoundThisFrame = false;
         latestSoundStrength = 0f;
     }
@@ -82,34 +78,30 @@ public class HearingCircle : MonoBehaviour
 
         float dist = Vector3.Distance(transform.position, e.position);
 
-        // sound didnt reach us
-        if (dist > e.radius) return;
-        if (dist > hearingRadius) return;
+        float maxRange = hearingRadius + e.radius;
+        if (dist > maxRange) return;
 
-        // work out how strong the sound is based on distance
-        float maxRange = Mathf.Min(e.radius, hearingRadius);
         float strength = 1f - (dist / maxRange);
         strength = Mathf.Clamp01(strength);
 
-        // reduce strength if theres a wall in the way
         if (blockedSound)
         {
-            Vector3 start = transform.position + Vector3.up * 1.6f;
-            Vector3 end = e.position + Vector3.up * 0.1f;
-            Vector3 dir = end - start;
-            float len = dir.magnitude;
+            Vector3 start = transform.position + Vector3.up * 1f;
+            Vector3 end = e.position + Vector3.up * 1f;
 
-            if (len > 0.01f)
-            {
-                dir = dir / len;
-                if (Physics.Raycast(start, dir, len, obstacleMask, QueryTriggerInteraction.Ignore))
-                    strength *= blockedSoundfalloff;
-            }
+            bool hitWall = Physics.Linecast(start, end, obstacleMask, QueryTriggerInteraction.Ignore);
+
+            if (drawSoundRay)
+                Debug.DrawLine(start, end, hitWall ? Color.red : Color.green, 1f);
+
+            if (hitWall)
+                strength *= blockedSoundFalloff;
         }
 
         if (strength <= 0f) return;
 
-        // keep the strongest sound if multiple noises happened this frame
+        LastHeardStrength = strength;
+
         if (strength > latestSoundStrength)
         {
             latestSoundStrength = strength;
@@ -124,6 +116,7 @@ public class HearingCircle : MonoBehaviour
     {
         HearingLevel = 0f;
         HasHeardSomething = false;
+        LastHeardStrength = 0f;
         receivedSoundThisFrame = false;
         latestSoundStrength = 0f;
     }

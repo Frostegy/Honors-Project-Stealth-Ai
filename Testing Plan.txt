@@ -1,0 +1,29 @@
+easy level
+- 4 enemies - two moving two standing still and rotating
+
+-vision cones- one each
+- no hearing on any
+
+standing enemies should have longer vision but at a shorter angle
+
+moving enemies should be larger angle but smaller vision
+
+
+should only get suspicious slowly
+enemies should take longer to detect player 
+
+
+hard Level
+
+5 enemies - three moving, two standing still and rotating
+
+vision cones - standing enemies should have 1 while the last two should have 2 , first one should have 3
+
+hearing cones on all walking enemies but last one should have better hearing range and through walls
+
+standing enemies same as easy but with faster detection time
+
+moving enemies first cone should be very small but wide and should almost instantly detect player, second cone should be wide but medium distance
+
+1st enemy same small cone and a medium and large cone  with different levels of detection
+

@@ -1,50 +1,43 @@
-using NUnit.Framework.Internal;
 using UnityEngine;
-
 
 public class VisionCone : MonoBehaviour
 {
-
+    [Header("References")]
+    [Tooltip("The material used to render the vision cone in the game view.")]
     public Material visionConeMaterial;
 
-    [Header("Vision Settings")]
-
-    [Tooltip("How far the enemy can see. This is the radius of the vision cone")]
+    [Header("Vision")]
+    [Tooltip("How far the enemy can see.")]
     public float visionRange = 5f;
-    [Tooltip("The angle of the vision cone")]
+    [Tooltip("The width of the vision cone in degrees.")]
     public float visionAngle = 90f;
-    [Tooltip("The layers that the vision cone will consider as obstacles. The enemy will not see through these layers")]
+    [Tooltip("Layers treated as obstacles. The enemy cannot see through these.")]
     public LayerMask obstacleMask;
 
-    [Header("Detection Settings")]
-
-    [Tooltip("When the player enters the vision cone, this timer starts. If the player stays in the cone for this long, they are fully detected")]
+    [Header("Detection")]
+    [Tooltip("How long the player must stay in the cone to be fully detected.")]
     public float timeToDetect = 1f;
-    
-    [Tooltip("When the player leaves the vision cone, this timer starts. If the player stays out of the cone for this long, they are no longer detected")]
-    public float detectionFalloff = 3f;
-    public float DetectionAmount { get; private set; }
-
+    [Tooltip("If enabled, detection level will not change.")]
     public bool freezeDetection = false;
 
+    [Header("Cone Mesh")]
+    [Tooltip("Show the vision cone mesh during play mode.")]
+    public bool showConeInGame = true;
 
-
-    [Header("Mesh Settings ")]
-    [HideInInspector]public int coneResolution = 120;
-     public bool showConeInGame = true;
-
-    [Header("Gizmos Settings - Adjust the colour of the cone and whether to draw it in the editor")]
-    [HideInInspector] public float eyeHeight = 0.8f;
+    [Header("Gizmos")]
+    [Tooltip("Colour of the cone drawn in the editor.")]
     public Color coneColor = new Color(0f, 1f, 1f, 0.25f);
+
+    [HideInInspector] public int coneResolution = 120;
+    [HideInInspector] public float eyeHeight = 0.8f;
     [HideInInspector] public int gizmoSegments = 30;
 
-    [Header("Gets the stuff")]
+    public float DetectionAmount { get; private set; }
+
     private Transform playerTransform;
     private Mesh coneMesh;
     private MeshFilter meshFilter;
     private MeshRenderer meshRenderer;
-
-
 
     void Awake()
     {
@@ -79,65 +72,38 @@ public class VisionCone : MonoBehaviour
 
     void UpdateDetection()
     {
-        // dont do anything if frozen
         if (freezeDetection) return;
 
-        // if there is no player just drain and return
         if (playerTransform == null)
         {
-            DetectionFalloff();
+            DetectionAmount = 0f;
             return;
         }
 
         if (CanSeePlayer(playerTransform))
         {
-            // work out how far the player is as a 0-1 value
-            float dist = Vector3.Distance(transform.position, playerTransform.position);
-
-
-            // closer = faster detection, further = slower
             float fillSpeed = 1f / timeToDetect;
-
-
             DetectionAmount += fillSpeed * Time.deltaTime;
         }
         else
         {
-            DetectionFalloff();
+            DetectionAmount = 0f;
         }
 
-        // make sure it stays between 0 and 1
         DetectionAmount = Mathf.Clamp01(DetectionAmount);
-    }
-
-    void DetectionFalloff()
-    {
-        if (detectionFalloff <= 0f)
-        {
-            DetectionAmount = 0f;
-            return;
-        }
-
-        DetectionAmount -= (1f / detectionFalloff) * Time.deltaTime;
-
-        if (DetectionAmount < 0f)
-            DetectionAmount = 0f;
     }
 
     public bool CanSeePlayer(Transform player)
     {
         if (player == null) return false;
 
-        // check range first so we dont waste time on the other checks
         float distToPlayer = Vector3.Distance(transform.position, player.position);
         if (distToPlayer > visionRange) return false;
 
-        // check if player is inside the cone angle
         Vector3 dirToPlayer = (player.position - transform.position).normalized;
         float angleBetween = Vector3.Angle(transform.forward, dirToPlayer);
         if (angleBetween > visionAngle / 2f) return false;
 
-        // finally check if there is a wall in the way
         Vector3 rayStart = transform.position + Vector3.up * eyeHeight;
         Vector3 rayEnd = player.position + Vector3.up * 0.9f;
         Vector3 rayDir = rayEnd - rayStart;
@@ -248,7 +214,6 @@ public class VisionCone : MonoBehaviour
         Gizmos.color = Color.cyan;
         Gizmos.DrawRay(origin, transform.forward * visionRange);
 
-        // draw a little bar above the cone showing how detected the player is
         if (Application.isPlaying && DetectionAmount > 0f)
         {
             Vector3 barStart = transform.position + Vector3.up * 2.8f;
@@ -260,14 +225,6 @@ public class VisionCone : MonoBehaviour
         }
     }
 }
-
-   
-
-
-
-
-
-
 
 
 
