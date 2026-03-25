@@ -45,9 +45,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hearingRadius: 10
-  useOcclusion: 1
+  hearingFillSpeed: 0.5
+  hearingDrainTime: 4
+  blockedSound: 1
   obstacleMask:
     serializedVersion: 2
     m_Bits: 64
-  occludedMultiplier: 0.35
+  blockedSoundFalloff: 0.35
   drawGizmos: 1
+  drawSoundRay: 1
+  stopDetecting: 0

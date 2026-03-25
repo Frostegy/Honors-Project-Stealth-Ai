@@ -3,34 +3,37 @@ using UnityEngine;
 public class VisionCone : MonoBehaviour
 {
     [Header("References")]
-    [Tooltip("The material used to render the vision cone in the game view.")]
+    [Tooltip("Vision Cone Colour in Game")]
     public Material visionConeMaterial;
 
     [Header("Vision")]
-    [Tooltip("How far the enemy can see.")]
+    [Tooltip("Vision Cones Range")]
     public float visionRange = 5f;
-    [Tooltip("The width of the vision cone in degrees.")]
+    [Tooltip("The width of the vision cone")]
     public float visionAngle = 90f;
-    [Tooltip("Layers treated as obstacles. The enemy cannot see through these.")]
+    [Tooltip("Layers treated as obstacles, The enemy cannot see through these")]
     public LayerMask obstacleMask;
 
     [Header("Detection")]
     [Tooltip("How long the player must stay in the cone to be fully detected.")]
     public float timeToDetect = 1f;
-    [Tooltip("If enabled, detection level will not change.")]
-    public bool freezeDetection = false;
+    [Tooltip("How long it takes for detection to fully drain after losing sight of player")]
+    public float detectionDrainTime = 2f;
+    [Tooltip("If enabled, detection level will not change")]
+    private bool freezeDetection = false;
+
 
     [Header("Cone Mesh")]
-    [Tooltip("Show the vision cone mesh during play mode.")]
+    [Tooltip("Show the vision cone mesh during play mode")]
     public bool showConeInGame = true;
 
-    [Header("Gizmos")]
+    [Header("Gizmo Color")]
     [Tooltip("Colour of the cone drawn in the editor.")]
     public Color coneColor = new Color(0f, 1f, 1f, 0.25f);
 
-    [HideInInspector] public int coneResolution = 120;
-    [HideInInspector] public float eyeHeight = 0.8f;
-    [HideInInspector] public int gizmoSegments = 30;
+    private int coneResolution = 120;
+    private float eyeHeight = 0.8f;
+    private int gizmoSegments = 30;
 
     public float DetectionAmount { get; private set; }
 
@@ -72,7 +75,10 @@ public class VisionCone : MonoBehaviour
 
     void UpdateDetection()
     {
-        if (freezeDetection) return;
+        if (freezeDetection)
+        {
+            return;
+        }
 
         if (playerTransform == null)
         {
@@ -87,7 +93,9 @@ public class VisionCone : MonoBehaviour
         }
         else
         {
-            DetectionAmount = 0f;
+           
+            DetectionAmount -= (1f / detectionDrainTime) * Time.deltaTime;   
+            
         }
 
         DetectionAmount = Mathf.Clamp01(DetectionAmount);
@@ -95,26 +103,46 @@ public class VisionCone : MonoBehaviour
 
     public bool CanSeePlayer(Transform player)
     {
-        if (player == null) return false;
+        if (player == null)
+        {
+            return false;
+        }
 
-        float distToPlayer = Vector3.Distance(transform.position, player.position);
-        if (distToPlayer > visionRange) return false;
+        Vector3 toPlayer = player.position - transform.position;
+        float distToPlayer = toPlayer.magnitude;
 
-        Vector3 dirToPlayer = (player.position - transform.position).normalized;
-        float angleBetween = Vector3.Angle(transform.forward, dirToPlayer);
-        if (angleBetween > visionAngle / 2f) return false;
+        if (distToPlayer > visionRange)
+        {
+            return false;
+        }
+
+        // flatten both directions so height does not affect cone angle
+        Vector3 flatToPlayer = new Vector3(toPlayer.x, 0f, toPlayer.z).normalized;
+        Vector3 flatForward = new Vector3(transform.forward.x, 0f, transform.forward.z).normalized;
+
+        float angleBetween = Vector3.Angle(flatForward, flatToPlayer);
+
+        if (angleBetween > visionAngle * 0.5f)
+        {
+            return false;
+        }
 
         Vector3 rayStart = transform.position + Vector3.up * eyeHeight;
         Vector3 rayEnd = player.position + Vector3.up * 0.9f;
         Vector3 rayDir = rayEnd - rayStart;
         float rayLength = rayDir.magnitude;
 
-        if (rayLength <= 0.01f) return true;
+        if (rayLength <= 0.01f)
+        {
+            return true;
+        }
 
-        rayDir = rayDir / rayLength;
+        rayDir /= rayLength;
 
         if (Physics.Raycast(rayStart, rayDir, rayLength, obstacleMask, QueryTriggerInteraction.Ignore))
+        {
             return false;
+        }
 
         return true;
     }

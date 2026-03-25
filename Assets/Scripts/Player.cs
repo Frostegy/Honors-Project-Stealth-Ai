@@ -24,9 +24,9 @@ public class Player : MonoBehaviour
 
     [Header("Footsteps")]
     [Tooltip("Time between footstep sounds while walking.")]
-    [SerializeField] private float walkStepInterval = 0.4f;
+    private float walkStepInterval = 0.35f;
     [Tooltip("Time between footstep sounds while sprinting.")]
-    [SerializeField] private float runStepInterval = 0.25f;
+    private float runStepInterval = 0.2f;
 
     [Header("Gizmos")]
     [Tooltip("Draw the noise radius in the editor.")]
@@ -34,7 +34,7 @@ public class Player : MonoBehaviour
     [Tooltip("If enabled, always shows both walk and run radii. If disabled, shows the current movement state radius only.")]
     [SerializeField] private bool alwaysShowRadius = true;
 
-    [Header("Debug Info (Read Only)")]
+    [Header("Debug")]
     [Tooltip("Whether the player is currently sprinting.")]
     public bool isSprinting = false;
     [Tooltip("Whether the player is currently crouching.")]
@@ -72,10 +72,16 @@ public class Player : MonoBehaviour
         Vector3 move = new Vector3(moveX, 0f, moveZ);
 
         if (isSprinting)
+        {
             move = move * speedMultiplier;
+        }
+            
 
         if (isCrouching)
+        {
             move = move / speedMultiplier;
+        }
+           
 
         controller.Move(move * speed * Time.deltaTime);
 
@@ -105,7 +111,12 @@ public class Player : MonoBehaviour
 
     public void EmitFootstep(bool running)
     {
-        if (NoiseSystem.Instance == null) return;
+        if (NoiseSystem.Instance == null) 
+        {
+
+            return;
+        }
+            
 
         float r = running ? runRadius : walkRadius;
         NoiseType type = running ? NoiseType.Running : NoiseType.Footstep;

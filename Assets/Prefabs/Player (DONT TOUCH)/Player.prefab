@@ -153,12 +153,12 @@ MonoBehaviour:
   cameraTransform: {fileID: 0}
   source: {fileID: 1115696160874903009}
   footstepClip: {fileID: 8300000, guid: d3e96d82284c5f948b0b043088e28078, type: 3}
-  speed: 10
-  speedMultiplier: 2
-  walkRadius: 5
-  runRadius: 10
-  walkStepInterval: 0.1
-  runStepInterval: 0.35
+  speed: 5
+  speedMultiplier: 1.5
+  walkRadius: 4
+  runRadius: 9
+  walkStepInterval: 0.35
+  runStepInterval: 0.2
   drawNoiseRadius: 1
   alwaysShowRadius: 1
   isSprinting: 0

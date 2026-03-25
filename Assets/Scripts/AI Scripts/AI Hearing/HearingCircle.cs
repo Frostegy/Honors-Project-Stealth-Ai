@@ -20,7 +20,7 @@ public class HearingCircle : MonoBehaviour
     [Tooltip("How much a wall reduces the sound strength. 0 = fully blocked, 1 = no reduction.")]
     [Range(0f, 1f)] public float blockedSoundFalloff = 0.35f;
 
-    [Header("Gizmos")]
+    [Header("Gizmo & Debug")]
     [Tooltip("Draw the hearing radius in the editor.")]
     public bool drawGizmos = true;
     [Tooltip("Draw a line in the scene view showing whether the last sound was blocked by a wall.")]

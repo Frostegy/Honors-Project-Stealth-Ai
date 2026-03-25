@@ -227,7 +227,7 @@ Transform:
   m_GameObject: {fileID: 4551575961019655702}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 8.33, y: 1.6540693, z: -29.3}
+  m_LocalPosition: {x: 8.33, y: 1, z: -29.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -357,7 +357,6 @@ MonoBehaviour:
   lookSpeed: 1
   stopDistance: 0.6
   patrolWaitTime: 2
-  suspiciousSpeedMultiplier: 0.6
   suspiciousThreshold: 0.15
   lookAroundTime: 2
   currentState: 0
@@ -374,7 +373,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.50000024
-  m_Speed: 3.5
+  m_Speed: 4
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120

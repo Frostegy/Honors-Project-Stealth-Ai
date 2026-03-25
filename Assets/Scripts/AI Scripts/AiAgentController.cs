@@ -45,7 +45,7 @@ public class AiAgentController : MonoBehaviour
     [Tooltip("How long the enemy spins and looks around after reaching a search position.")]
     public float lookAroundTime = 2f;
 
-    [Header("Debug Info (Read Only)")]
+    [Header("Debug Info")]
     [Tooltip("The enemy's current behaviour state.")]
     public EnemyState currentState = EnemyState.Patrolling;
     [Tooltip("Current detection level from 0 to 1.")]
