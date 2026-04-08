@@ -55,13 +55,16 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void LateUpdate()
+    private void LateUpdate() // this is where we update the camera position to follow the player
     {
         if (cameraTransform != null)
+        {
             cameraTransform.position = transform.position + cameraOffset;
+        }
+            
     }
 
-    private void Update()
+    private void Update() // this is where we handle player input and movement
     {
         float moveX = Input.GetAxis("Horizontal");
         float moveZ = Input.GetAxis("Vertical");
@@ -109,7 +112,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void EmitFootstep(bool running)
+    public void EmitFootstep(bool running) // call this from  movement code whenever the player takes a step
     {
         if (NoiseSystem.Instance == null) 
         {
@@ -130,7 +133,7 @@ public class Player : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected() // this draws the noise radius in the editor when the player is selected
     {
         if (!drawNoiseRadius) return;
 

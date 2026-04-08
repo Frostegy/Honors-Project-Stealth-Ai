@@ -1,22 +1,21 @@
 using System;
 using UnityEngine;
 
-public enum NoiseType
+public enum NoiseType // different types of noise for more nuanced AI reactions
 {
     Footstep,
-    Running
+    Running 
 }
 
-public struct NoiseEvent
+public struct NoiseEvent // this struct is used to pass noise information to listeners
 {
-    public Vector3 position;
-    public float radius;
-    public NoiseType type;
-    public Transform source;
+    public Vector3 position; // where the noise happened
+    public float radius; // how far the noise can be heard
+    public NoiseType type; // what type of noise it is (footstep, running, etc.)
+    public Transform source; // optional reference to the source of the noise (e.g. the player transform) for more advanced AI reactions
 }
 
-// put this on an empty gameobject in your scene
-// other scripts call NoiseSystem.Instance.Emit() to make a sound
+// put on empty GameObject in the scene
 public class NoiseSystem : MonoBehaviour
 {
     public static NoiseSystem Instance;
@@ -24,7 +23,7 @@ public class NoiseSystem : MonoBehaviour
     // hearing sensors subscribe to this event to know when a sound happens
     public static event Action<NoiseEvent> OnNoiseEmitted;
 
-    void Awake()
+    void Awake() 
     {
         // make sure there is only ever one noise system
         if (Instance != null && Instance != this)
@@ -37,7 +36,7 @@ public class NoiseSystem : MonoBehaviour
     }
 
     // call this from anywhere to make a noise
-    // e.g. NoiseSystem.Instance.Emit(transform.position, 5f, NoiseType.Footstep);
+    // to use NoiseSystem.Instance.Emit(transform.position, 5f, NoiseType.Footstep);
     public void Emit(Vector3 position, float radius, NoiseType type, Transform source = null)
     {
         NoiseEvent newEvent = new NoiseEvent();

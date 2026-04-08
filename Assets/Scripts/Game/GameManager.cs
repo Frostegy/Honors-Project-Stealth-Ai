@@ -27,60 +27,76 @@ public class GameManager : MonoBehaviour
 
         // hide the game over screen at the start
         if (gameOverCanvas != null)
+        {
             gameOverCanvas.SetActive(false);
+        }
+           
     }
 
     public void TriggerGameOver()
     {
-        if (gameIsOver) return;
+        if (gameIsOver) 
+        {
+            return;
+        }
+        
 
         gameIsOver = true;
 
-        if (gameOverCanvas != null)
+        if (gameOverCanvas != null) 
+        { 
             gameOverCanvas.SetActive(true);
+        }
 
+           
         Time.timeScale = 0f;
     }
 
     public void TriggerWin()
     {
-        if (gameIsOver) return;
+        if (gameIsOver) 
+        {
+            return;
+        } 
 
         gameIsOver = true;
 
         if (winCanvas != null)
+        {
             winCanvas.SetActive(true);
+        }
+           
 
         Time.timeScale = 0f;
     }
 
-    public void RestartGame()
+    public void RestartGame() // Restarts game  
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
-    public void GoToMainMenu()
+    public void GoToMainMenu() // Goes back to main menu
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("MainMenu");
     }
 
-    public void PlayLevel1()
+    public void PlayLevel1() // plays level 1 
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("Easy Level");
     }
 
-    public void PlayLevel2()
+    public void PlayLevel2() // plays level 2
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene("Hard Level");
     }
 
-    public void QuitGame()
+    public void QuitGame() // Quits the game
     {
-        // this only works in a built game, not in the Unity editor
+        // doesnt work in editor version
         Application.Quit();
     }
 }

@@ -56,6 +56,7 @@ public class AiAgentController : MonoBehaviour
     [Tooltip("True on the frame detection is fully lost.")]
     public bool hasLostDetection = false;
 
+    // all values below are for internal use and are not meant to be set in the editor
     private NavMeshAgent navAgent;
     private bool isLookingAround = false;
     private int patrolIndex = 0;
@@ -107,6 +108,7 @@ public class AiAgentController : MonoBehaviour
         }
     }
 
+
     private void Start()
     {
         startRotation = transform.rotation;
@@ -120,6 +122,7 @@ public class AiAgentController : MonoBehaviour
             navAgent.isStopped = true;
         }
     }
+
 
     private void Update()
     {
@@ -145,15 +148,15 @@ public class AiAgentController : MonoBehaviour
             return;
         }
 
-        if (isStationary)
+        if (isStationary) // if the enemy is stationary they don't do normal patrols, they just look left and right and react to sounds/vision as normal
         {
             DoLookLeftRight();
             return;
         }
 
-        switch (currentState)
+        switch (currentState)// State Machine
         {
-            case EnemyState.Patrolling:
+            case EnemyState.Patrolling: // in this state the enemy moves between patrol points and waits at them, if they see or hear something they go to suspicious
                 {
                     DoPatrol();
 
@@ -165,7 +168,7 @@ public class AiAgentController : MonoBehaviour
                     break;
                 }
 
-            case EnemyState.Suspicious:
+            case EnemyState.Suspicious: // in this state the enemy has seen or heard something and is more alert, if they lose it they go back to patrols, if they keep it or see/hear more they go to searching
                 {
                     DoPatrol();
 
@@ -178,7 +181,7 @@ public class AiAgentController : MonoBehaviour
                     break;
                 }
 
-            case EnemyState.Searching:
+            case EnemyState.Searching: // in this state the enemy moves to the last known position of the player or the location of a noise, and looks around for them
                 {
                     if (hasSearchPos == false)
                     {
@@ -208,7 +211,7 @@ public class AiAgentController : MonoBehaviour
                     break;
                 }
 
-            case EnemyState.LookingAround:
+            case EnemyState.LookingAround: // looks around for a bit after reaching a search position, then goes back to patrolling. If they see or hear the player while looking around they go back to searching and reset the look around timer
                 {
                     // coroutine handles this bit
                     break;
@@ -216,7 +219,7 @@ public class AiAgentController : MonoBehaviour
         }
     }
 
-    private void DoLookLeftRight()
+    private void DoLookLeftRight()// used when the enemy is stationary, just makes them look left and right to simulate them "patrolling" an area with their sight
     {
         lookTimer += Time.deltaTime * lookSpeed;
 
@@ -225,7 +228,7 @@ public class AiAgentController : MonoBehaviour
         transform.rotation = startRotation * Quaternion.Euler(0f, angle, 0f);
     }
 
-    private void UpdateDetectionLevel()
+    private void UpdateDetectionLevel() // checks vision cones and hearing sensor to update the current detection level, also handles hearing reactions like going to investigate a noise
     {
         // hearing reaction first
         if (isStationary == false && hearingSensor != null && hearingSensor.HasHeardSomething && hearingSensor.LastHeardStrength >= suspiciousThreshold)
@@ -281,7 +284,7 @@ public class AiAgentController : MonoBehaviour
             highest = hearingSensor.HearingLevel;
         }
 
-        // small shortcut: if we kinda see the player, go to them
+        // if we kinda see the player, go to them
         if (isStationary == false && highest >= suspiciousThreshold && player != null)
         {
             NavMeshHit navHit;
@@ -303,7 +306,7 @@ public class AiAgentController : MonoBehaviour
         currentDetectionLevel = highest;
     }
 
-    private IEnumerator LookAroundRoutine()
+    private IEnumerator LookAroundRoutine() // called when the enemy reaches a search position, makes them look around for a bit before resuming patrols
     {
         currentState = EnemyState.LookingAround;
 
@@ -329,7 +332,7 @@ public class AiAgentController : MonoBehaviour
         GoToClosestPatrolPoint();
     }
 
-    private void DoPatrol()
+    private void DoPatrol() // handles moving between patrol points and waiting at them
     {
         if (waitingAtPoint)
         {
@@ -342,7 +345,7 @@ public class AiAgentController : MonoBehaviour
         }
     }
 
-    private IEnumerator WaitAtPoint()
+    private IEnumerator WaitAtPoint() // called when the enemy reaches a patrol point, makes them wait for a bit before moving to the next one
     {
         waitingAtPoint = true;
 
@@ -365,7 +368,7 @@ public class AiAgentController : MonoBehaviour
         waitingAtPoint = false;
     }
 
-    private void GoToNextPatrolPoint()
+    private void GoToNextPatrolPoint() // sets the nav agent's destination to the next patrol point
     {
         if (patrolPoints == null || patrolPoints.Length == 0)
         {
@@ -380,7 +383,7 @@ public class AiAgentController : MonoBehaviour
         navAgent.SetDestination(patrolPoints[patrolIndex].position);
     }
 
-    private void GoToClosestPatrolPoint()
+    private void GoToClosestPatrolPoint() // used when losing the player or after searching, to resume patrols from the nearest point
     {
         if (patrolPoints == null || patrolPoints.Length == 0)
         {
@@ -411,7 +414,7 @@ public class AiAgentController : MonoBehaviour
         navAgent.SetDestination(patrolPoints[patrolIndex].position);
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnDrawGizmosSelected() 
     {
         if (hasHeardSomething)
         {

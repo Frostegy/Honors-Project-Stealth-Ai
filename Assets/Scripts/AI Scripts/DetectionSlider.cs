@@ -8,32 +8,43 @@ public class DetectionMeterUI : MonoBehaviour
     public Slider detectionSlider;
     public Image sliderFillImage;
 
-    [Header("Colours")]
+    [Header("Colours")] 
     public Color normalColor = Color.green;
     public Color suspiciousColor = Color.yellow;
     public Color alertColor = Color.red;
 
-    private void Update()
+    private void Update() // this is where we update the slider value and color based on the enemy's current detection level
     {
-        if (enemy == null) return;
-
-        // update the slider every frame by reading directly from the enemy
+        if (enemy == null) 
+        { 
+            return;
+        }
+            
         detectionSlider.value = enemy.currentDetectionLevel;
 
-        // update the colour based on how detected the player is
+       
         if (enemy.currentDetectionLevel < 0.25f)
-            sliderFillImage.color = normalColor;
+        {
+                sliderFillImage.color = normalColor;
+        }  
         else if (enemy.currentDetectionLevel < 1f)
+        {
             sliderFillImage.color = suspiciousColor;
+        }
         else
-            sliderFillImage.color = alertColor;
-
-        // these bools are only true for one frame so we can use them for one off things
-        // like playing a sound or flashing the screen when the enemy spots you
+        {
+                sliderFillImage.color = alertColor;
+        }
+            
         if (enemy.isFullyDetected)
-            sliderFillImage.color = alertColor;
-
+        {
+                sliderFillImage.color = alertColor;
+        }
+            
         if (enemy.hasLostDetection)
-            sliderFillImage.color = normalColor;
+        {
+                sliderFillImage.color = normalColor;
+        }
+            
     }
 }
