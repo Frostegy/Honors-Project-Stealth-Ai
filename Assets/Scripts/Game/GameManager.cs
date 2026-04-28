@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -33,7 +32,7 @@ public class GameManager : MonoBehaviour
            
     }
 
-    public void TriggerGameOver()
+    public void TriggerGameOver() // this is called when the player gets caught
     {
         if (gameIsOver) 
         {
@@ -52,7 +51,7 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
-    public void TriggerWin()
+    public void TriggerWin() // this is called when the player wins the game
     {
         if (gameIsOver) 
         {

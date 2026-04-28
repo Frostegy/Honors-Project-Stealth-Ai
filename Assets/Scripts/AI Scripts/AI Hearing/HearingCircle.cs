@@ -31,28 +31,28 @@ public class HearingCircle : MonoBehaviour
     [Tooltip("Draw a line in the scene view showing whether the last sound was blocked by a wall.")]
     [SerializeField] private bool drawSoundRay = true;
 
-    public float HearingLevel { get; private set; }
+    public float HearingLevel { get; private set; } 
     public bool stopDetecting = false;
-    public Vector3 LastHeardPosition { get; private set; }
-    public bool HasHeardSomething { get; set; }
+    public Vector3 LastHeardPosition { get; private set; } // the last sound heard postion is stored here
+    public bool HasHeardSomething { get; set; } 
     public float LastHeardStrength { get; private set; }
 
     private float latestSoundStrength = 0f;
     private bool receivedSoundThisFrame = false;
 
-    private AiAgentController ownerController;
+    private AiAgentController ownerController; 
 
     void Awake()
     {
         ownerController = GetComponentInParent<AiAgentController>(); // assuming the hearing circle is a child of the enemy GameObject that has the AiAgentController script
     }
 
-    void OnEnable()
+    void OnEnable() // subscribe to the noise system event when enabled
     {
         NoiseSystem.OnNoiseEmitted += OnNoise;
     }
 
-    void OnDisable() 
+    void OnDisable() // unsubscribe from the noise system event when disabled
     {
         NoiseSystem.OnNoiseEmitted -= OnNoise;
     }
@@ -61,19 +61,22 @@ public class HearingCircle : MonoBehaviour
     {
         if (stopDetecting) return;
 
-        if (receivedSoundThisFrame)
+        if (receivedSoundThisFrame) 
         {
             HearingLevel += latestSoundStrength * hearingFillSpeed * Time.deltaTime;
         }
         else
         {
             if (hearingDrainTime > 0f)
+            {
                 HearingLevel -= (1f / hearingDrainTime) * Time.deltaTime;
+            }
+                
         }
 
-        HearingLevel = Mathf.Clamp01(HearingLevel);
+        HearingLevel = Mathf.Clamp01(HearingLevel); 
 
-        receivedSoundThisFrame = false;
+        receivedSoundThisFrame = false; 
         latestSoundStrength = 0f;
     }
 
@@ -87,6 +90,7 @@ public class HearingCircle : MonoBehaviour
         float dist = Vector3.Distance(transform.position, e.position);
 
         float maxRange = hearingRadius + e.radius;
+
         if (dist > maxRange)
         {
             return;
@@ -96,7 +100,7 @@ public class HearingCircle : MonoBehaviour
         float strength = 1f - (dist / maxRange);
         strength = Mathf.Clamp01(strength);
 
-        if (blockedSound)
+        if (blockedSound) // if sound occlusion is enabled, we do a linecast to see if there is a wall between the enemy and the sound source
         {
             Vector3 start = transform.position + Vector3.up * 1f;
             Vector3 end = e.position + Vector3.up * 1f;
@@ -104,17 +108,27 @@ public class HearingCircle : MonoBehaviour
             bool hitWall = Physics.Linecast(start, end, obstacleMask, QueryTriggerInteraction.Ignore);
 
             if (drawSoundRay)
+            {
                 Debug.DrawLine(start, end, hitWall ? Color.red : Color.green, 1f);
+            }
+                
 
             if (hitWall)
+            {
                 strength *= blockedSoundFalloff;
+            }
+                
         }
 
-        if (strength <= 0f) return;
+        if (strength <= 0f) 
+        {
+            return;
+        }
+        
 
         LastHeardStrength = strength;
 
-        if (strength > latestSoundStrength)
+        if (strength > latestSoundStrength) 
         {
             latestSoundStrength = strength;
             LastHeardPosition = e.position;
@@ -139,6 +153,7 @@ public class HearingCircle : MonoBehaviour
         {
             return;
         }
+
         Gizmos.color = new Color(1f, 1f, 0f, 0.2f);
         Gizmos.DrawSphere(transform.position, hearingRadius);
     }

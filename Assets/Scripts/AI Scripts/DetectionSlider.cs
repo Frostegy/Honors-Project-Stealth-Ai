@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DetectionMeterUI : MonoBehaviour
+public class DetectionSlider : MonoBehaviour
 {
     [Header("References")]
     public AiAgentController enemy;

@@ -34,11 +34,11 @@ public class VisionCone : MonoBehaviour
     [Tooltip("Colour of the cone drawn in the editor.")]
     [SerializeField] private Color coneColor = new Color(0f, 1f, 1f, 0.25f); // cyan with some transparency
 
-    private int coneResolution = 120; 
+    private int coneResolution = 120; // how many vertices to use when generating the vision cone mesh 
 
-    private float eyeHeight = 0.8f;
+    private float eyeHeight = 0.8f; // enemey eye height
 
-    private int gizmoSegments = 30;
+    private int gizmoSegments = 30; // how many segments to use when drawing the cone in the editor
 
 
     public float DetectionAmount { get; private set; } 
@@ -53,7 +53,7 @@ public class VisionCone : MonoBehaviour
         SetupMesh();
     }
 
-    void Start()
+    void Start() 
     {
         SetupMesh();
 
@@ -76,7 +76,7 @@ public class VisionCone : MonoBehaviour
             
     }
 
-    public void SetPlayerTransform(Transform player) 
+    public void SetPlayerTransform(Transform player)  
     {
         playerTransform = player;
     }
@@ -112,7 +112,7 @@ public class VisionCone : MonoBehaviour
         DetectionAmount = Mathf.Clamp01(DetectionAmount);
     }
 
-
+    //does three checks - is the player close enough, is the player inside the cone, is there clear line of sight
     public bool CanSeePlayer(Transform player) // this is where we check if the player is within the vision cone and not behind an obstacle
     {
         if (player == null)
@@ -139,12 +139,11 @@ public class VisionCone : MonoBehaviour
             return false;
         }
 
-        Vector3 rayStart = transform.position + Vector3.up * eyeHeight;
-
+        // checks for raycast from the enemys eyes to the player to see if there is an obstacle that is in the way, if there is it cant see
+        Vector3 rayStart = transform.position + Vector3.up * eyeHeight; 
         Vector3 rayEnd = player.position + Vector3.up * 0.9f;
 
-        Vector3 rayDir = rayEnd - rayStart;
-
+        Vector3 rayDir = rayEnd - rayStart;                  
         float rayLength = rayDir.magnitude;
 
         if (rayLength <= 0.01f)
@@ -226,10 +225,16 @@ public class VisionCone : MonoBehaviour
             Vector3 localDir = (Vector3.forward * cos) + (Vector3.right * sin);
 
             RaycastHit hit;
+
             if (Physics.Raycast(transform.position, worldDir, out hit, visionRange, obstacleMask))
+            {
                 verts[i + 1] = localDir * hit.distance;
+            }  
             else
+            {
                 verts[i + 1] = localDir * visionRange;
+            }
+                
 
             currentAngle += angleStep;
         }
@@ -248,7 +253,7 @@ public class VisionCone : MonoBehaviour
         meshFilter.mesh = coneMesh;
     }
 
-    private void OnDrawGizmosSelected() // this draws the vision cone in the editor 
+    private void OnDrawGizmosSelected() // this draws the vision cone in the editor so you can see where it is  
     {
         Vector3 origin = transform.position + Vector3.up * eyeHeight;
         float halfAngle = visionAngle * 0.5f;
